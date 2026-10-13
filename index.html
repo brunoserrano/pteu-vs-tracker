@@ -78,24 +78,6 @@
                         <div id="local-tz-abbr" class="text-[10px] text-gray-400 truncate max-w-[120px] mx-auto">Detecting...</div>
                     </div>
 
-                    <!-- Irish Time (IST/GMT) Widget -->
-                    <div class="bg-ptDark-900/80 px-3.5 py-2 rounded-xl border border-emerald-500/20 text-center min-w-[125px] flex-1 sm:flex-initial">
-                        <div class="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-location-dot text-[10px]"></i> Irish Time
-                        </div>
-                        <div id="irish-clock" class="text-base sm:text-lg font-bold text-emerald-300 font-mono mt-0.5">00:00:00</div>
-                        <div class="text-[10px] text-emerald-500/70">Europe/Dublin</div>
-                    </div>
-
-                    <!-- Server Time (CEST - UTC+2 Base) Widget -->
-                    <div class="bg-ptDark-900/80 px-3.5 py-2 rounded-xl border border-amber-500/20 text-center min-w-[125px] flex-1 sm:flex-initial">
-                        <div class="text-[10px] uppercase tracking-wider text-amber-400 font-semibold flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-server text-[10px]"></i> Server (CEST)
-                        </div>
-                        <div id="cest-clock" class="text-base sm:text-lg font-bold text-amber-300 font-mono mt-0.5">00:00:00</div>
-                        <div class="text-[10px] text-amber-500/70">Dutch Base (UTC+2)</div>
-                    </div>
-
                     <!-- UTC Time Widget -->
                     <div class="bg-ptDark-900/80 px-3.5 py-2 rounded-xl border border-purple-500/20 text-center min-w-[125px] flex-1 sm:flex-initial">
                         <div class="text-[10px] uppercase tracking-wider text-purple-400 font-semibold flex items-center justify-center gap-1">
@@ -173,12 +155,6 @@
             <div class="flex flex-wrap items-center bg-ptDark-900 p-1 rounded-xl border border-gray-800 w-full sm:w-auto gap-1">
                 <button id="tz-mode-local" onclick="setTimezoneMode('local')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-amber-500 text-ptDark-950 shadow-md">
                     <i class="fa-solid fa-clock mr-1"></i> Local
-                </button>
-                <button id="tz-mode-irish" onclick="setTimezoneMode('irish')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition">
-                    <i class="fa-solid fa-location-dot mr-1"></i> Irish (IST)
-                </button>
-                <button id="tz-mode-cest" onclick="setTimezoneMode('cest')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition">
-                    <i class="fa-solid fa-flag-usa mr-1"></i> CEST (Dutch)
                 </button>
                 <button id="tz-mode-utc" onclick="setTimezoneMode('utc')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition">
                     <i class="fa-solid fa-globe mr-1"></i> UTC

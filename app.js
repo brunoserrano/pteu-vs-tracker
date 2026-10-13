@@ -1,5 +1,5 @@
 let scheduleData = [];
-let displayMode = 'local'; // Options: 'local', 'irish', 'cest', 'utc'
+let displayMode = 'local'; // Options: 'local', 'utc'
 let soundEnabled = false;
 let alertPlayedForNext = false;
 let audioContext = null;
@@ -92,16 +92,10 @@ function getUpcomingSpawnsList() {
 }
 
 function formatTimeForMode(dateObj, mode) {
-    if (mode === 'local') {
-        return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    } else if (mode === 'irish') {
-        return dateObj.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', minute: '2-digit', hour12: false });
-    } else if (mode === 'cest') {
-        return dateObj.toLocaleTimeString('de-DE', { timeZone: 'Europe/Amsterdam', hour: '2-digit', minute: '2-digit', hour12: false });
-    } else if (mode === 'utc') {
+    if (mode === 'utc') {
         return dateObj.toLocaleTimeString('en-US', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hour12: false }) + ' UTC';
     }
-    return dateObj.toLocaleTimeString();
+    return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 function updateUI() {
@@ -110,8 +104,6 @@ function updateUI() {
 
     // Clock updates
     document.getElementById('local-clock').textContent = nowObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    document.getElementById('irish-clock').textContent = nowObj.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    document.getElementById('cest-clock').textContent = nowObj.toLocaleTimeString('de-DE', { timeZone: 'Europe/Amsterdam', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
     document.getElementById('utc-clock').textContent = nowObj.toLocaleTimeString('en-US', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
     try {
@@ -231,18 +223,7 @@ function renderScheduleTable() {
     const now = new Date();
     const nowUtcMs = Date.now();
 
-    let currentHourInSelectedTz = 0;
-    if (displayMode === 'cest') {
-        const cestStr = now.toLocaleTimeString('de-DE', { timeZone: 'Europe/Amsterdam', hour: '2-digit', hour12: false });
-        currentHourInSelectedTz = parseInt(cestStr);
-    } else if (displayMode === 'irish') {
-        const ieStr = now.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', hour12: false });
-        currentHourInSelectedTz = parseInt(ieStr);
-    } else if (displayMode === 'utc') {
-        currentHourInSelectedTz = now.getUTCHours();
-    } else {
-        currentHourInSelectedTz = now.getHours();
-    }
+    const currentHourInSelectedTz = displayMode === 'utc' ? now.getUTCHours() : now.getHours();
 
     scheduleData.forEach((rowObj) => {
         const cestHour = rowObj.hour;
@@ -252,18 +233,7 @@ function renderScheduleTable() {
         let displayHourStart = 0;
         let hourLabel = "";
 
-        if (displayMode === 'cest') {
-            displayHourStart = cestHour;
-            const startH = String(cestHour).padStart(2, '0');
-            const endH = String((cestHour + 1) % 24).padStart(2, '0');
-            hourLabel = `${startH}:00 - ${endH}:00`;
-        } else if (displayMode === 'irish') {
-            const startStr = baseDate.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', hour12: false });
-            displayHourStart = parseInt(startStr);
-            const endDate = new Date(baseDate.getTime() + 3600000);
-            const endStr = endDate.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', hour12: false });
-            hourLabel = `${startStr}:00 - ${endStr}:00`;
-        } else if (displayMode === 'utc') {
+        if (displayMode === 'utc') {
             const startStr = baseDate.toLocaleTimeString('en-US', { timeZone: 'UTC', hour: '2-digit', hour12: false });
             displayHourStart = parseInt(startStr);
             const endDate = new Date(baseDate.getTime() + 3600000);
@@ -346,8 +316,6 @@ window.setTimezoneMode = function(mode) {
     
     const btnIds = {
         'local': 'tz-mode-local',
-        'irish': 'tz-mode-irish',
-        'cest': 'tz-mode-cest',
         'utc': 'tz-mode-utc'
     };
 
