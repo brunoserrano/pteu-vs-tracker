@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priston Tale EU - Vengeful Saint Boss Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ptGold: {
+                            400: '#f6d365',
+                            500: '#fda085',
+                            600: '#d4af37',
+                        },
+                        ptDark: {
+                            950: '#070a12',
+                            900: '#0b0f19',
+                            800: '#111827',
+                            700: '#1f2937',
+                            600: '#374151'
+                        },
+                        ptNeon: {
+                            cyan: '#00f2fe',
+                            purple: '#9d4edd',
+                            amber: '#ff9e00'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Cinzel', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #070a12;
+            color: #f3f4f6;
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(157, 78, 221, 0.12) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(0, 242, 254, 0.1) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(212, 175, 55, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .font-display {
+            font-family: 'Cinzel', serif;
+        }
+
+        .glow-gold {
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+        }
+
+        .glow-cyan {
+            text-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+        }
+
+        .glow-red {
+            text-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+        }
+
+        .glass-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-active {
+            background: rgba(31, 41, 55, 0.85);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.2);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }
+        }
+
+        .active-spawn-pulse {
+            animation: pulseGlow 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 lg:p-8 text-gray-100">
+
+    <div class="max-w-7xl mx-auto w-full space-y-6">
+        
+        <!-- Header -->
+        <header class="glass-card rounded-2xl p-4 sm:p-6 border-b border-amber-500/20 relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 text-center md:text-left">
+                    <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 text-amber-400 text-2xl sm:text-3xl">
+                        <i class="fa-solid fa-crosshairs"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 bg-clip-text text-transparent glow-gold">
+                            Priston Tale EU
+                        </h1>
+                        <p class="text-xs sm:text-sm text-gray-400">Vengeful Saint (VS) Boss Tracker</p>
+                    </div>
+                </div>
+
+                <!-- Clock Widgets -->
+                <div class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 w-full md:w-auto">
+                    <!-- Local Time Widget -->
+                    <div class="bg-ptDark-900/80 px-3.5 py-2 rounded-xl border border-gray-800 text-center min-w-[125px] flex-1 sm:flex-initial">
+                        <div class="text-[10px] uppercase tracking-wider text-cyan-400 font-semibold flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-user-clock text-[10px]"></i> Local Time
+                        </div>
+                        <div id="local-clock" class="text-base sm:text-lg font-bold text-gray-100 font-mono mt-0.5">00:00:00</div>
+                        <div id="local-tz-abbr" class="text-[10px] text-gray-400 truncate max-w-[120px] mx-auto">Detecting...</div>
+                    </div>
+
+                    <!-- Irish Time (IST/GMT) Widget -->
+                    <div class="bg-ptDark-900/80 px-3.5 py-2 rounded-xl border border-emerald-500/20 text-center min-w-[125px] flex-1 sm:flex-initial">
+                        <div class="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-location-dot text-[10px]"></i> Irish Time
+                        </div>
+                        <div id="irish-clock" class="text-base sm:text-lg font-bold text-emerald-300 font-mono mt-0.5">00:00:00</div>
+                        <div class="text-[10px] text-emerald-500/70">Europe/Dublin</div>
+                    </div>
+
+                    <!-- Server Time (CEST - UTC+2 Base) Widget -->
+                    <div class="bg-ptDark-900/80 px-3.5 py-2 rounded-xl border border-amber-500/20 text-center min-w-[125px] flex-1 sm:flex-initial">
+                        <div class="text-[10px] uppercase tracking-wider text-amber-400 font-semibold flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-server text-[10px]"></i> Server (CEST)
+                        </div>
+                        <div id="cest-clock" class="text-base sm:text-lg font-bold text-amber-300 font-mono mt-0.5">00:00:00</div>
+                        <div class="text-[10px] text-amber-500/70">Dutch Base (UTC+2)</div>
+                    </div>
+
+                    <!-- UTC Time Widget -->
+                    <div class="bg-ptDark-900/80 px-3.5 py-2 rounded-xl border border-purple-500/20 text-center min-w-[125px] flex-1 sm:flex-initial">
+                        <div class="text-[10px] uppercase tracking-wider text-purple-400 font-semibold flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-globe text-[10px]"></i> Server (UTC)
+                        </div>
+                        <div id="utc-clock" class="text-base sm:text-lg font-bold text-purple-300 font-mono mt-0.5">00:00:00</div>
+                        <div class="text-[10px] text-purple-500/70">UTC+00:00</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Display Card -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div id="hero-status-card" class="lg:col-span-2 glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 border-b border-gray-800 pb-3">
+                    <span id="spawn-status-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> NEXT SPAWN
+                    </span>
+                    <span id="next-spawn-time-label" class="text-xs text-gray-400 font-mono">Scheduled: --:--</span>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6 my-2">
+                    <div class="text-center md:text-left space-y-1">
+                        <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold">Target Location</p>
+                        <h2 id="next-map-name" class="font-display text-2xl sm:text-4xl font-extrabold text-amber-300 glow-gold">
+                            Loading schedule...
+                        </h2>
+                        <p id="next-spawn-time-local" class="text-sm text-cyan-300 font-medium pt-1">
+                            Calculated for your selected timezone view
+                        </p>
+                    </div>
+
+                    <!-- Countdown Timer -->
+                    <div class="text-center bg-ptDark-900/90 border border-amber-500/30 px-6 py-4 rounded-2xl shadow-inner min-w-[210px] w-full md:w-auto">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1">Time Remaining</p>
+                        <div id="countdown-timer" class="font-mono text-3xl sm:text-4xl font-extrabold text-cyan-400 glow-cyan">
+                            00m 00s
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Controls -->
+                <div class="mt-4 pt-3 border-t border-gray-800 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-400">
+                    <div class="flex items-center gap-2">
+                        <button id="sound-toggle-btn" class="px-3 py-1.5 rounded-lg bg-ptDark-900 border border-gray-700 hover:border-amber-500 text-gray-300 hover:text-white transition flex items-center gap-2">
+                            <i id="sound-icon" class="fa-solid fa-bell-slash text-gray-500"></i>
+                            <span id="sound-status-text">Audio Alert: Off</span>
+                        </button>
+                        <span class="text-[11px] text-gray-500 hidden sm:inline">(Alerts 2 mins before spawn)</span>
+                    </div>
+
+                    <button id="test-sound-btn" class="text-xs text-amber-400 hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-volume-high text-[10px]"></i> Test Chime
+                    </button>
+                </div>
+            </div>
+
+            <!-- Following 3 Spawns View -->
+            <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-gray-300 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-list-ol text-amber-400"></i> Following Spawns
+                    </h3>
+                    <div id="upcoming-list" class="space-y-3">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+                <p class="text-[11px] text-gray-500 mt-4 text-center">Spawns occur at :03, :23, :43 every hour (active 10m).</p>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="glass-card rounded-xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex flex-wrap items-center bg-ptDark-900 p-1 rounded-xl border border-gray-800 w-full sm:w-auto gap-1">
+                <button id="tz-mode-local" onclick="setTimezoneMode('local')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-amber-500 text-ptDark-950 shadow-md">
+                    <i class="fa-solid fa-clock mr-1"></i> Local
+                </button>
+                <button id="tz-mode-irish" onclick="setTimezoneMode('irish')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-location-dot mr-1"></i> Irish (IST)
+                </button>
+                <button id="tz-mode-cest" onclick="setTimezoneMode('cest')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-flag-usa mr-1"></i> CEST (Dutch)
+                </button>
+                <button id="tz-mode-utc" onclick="setTimezoneMode('utc')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-globe mr-1"></i> UTC
+                </button>
+            </div>
+
+            <div class="relative w-full sm:w-72">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                <input type="text" id="map-search-input" placeholder="Search map (e.g. Secret Laboratory, Ruinen)..." 
+                       class="w-full bg-ptDark-900 border border-gray-800 focus:border-amber-500 rounded-xl pl-9 pr-8 py-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none transition">
+                <button id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Full Timetable Table -->
+        <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="bg-ptDark-900/90 border-b border-gray-800 text-xs uppercase tracking-wider text-amber-400">
+                            <th class="py-4 px-6 w-1/4 font-semibold">Hour Window</th>
+                            <th class="py-4 px-6 w-1/4 font-semibold">Slot 1 (xx:03)</th>
+                            <th class="py-4 px-6 w-1/4 font-semibold">Slot 2 (xx:23)</th>
+                            <th class="py-4 px-6 w-1/4 font-semibold">Slot 3 (xx:43)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-tbody" class="divide-y divide-gray-800/60 text-xs font-medium text-gray-300">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="max-w-7xl mx-auto w-full mt-8 py-4 text-center text-xs text-gray-500 border-t border-gray-800/80">
+        <p>Priston Tale EU - Vengeful Saint Boss Schedule (Original Dutch CEST UTC+2 Base Preserved & Hour Lookups Synchronized).</p>
+    </footer>
+
+    <script>
+        /* ========================================================================
+           ORIGINAL DUTCH SCHEDULE BASE (CEST / UTC+2)
+           Matches original image exactly:
+           00 - 01: DS (:03), CN H (:23), Dun1 (:43)
+           01 - 02: RoC (:03), CT1 (:23), Ruinen (:43)
+           ...
+           23 - 00: Ruinen (:03), BotA (:23), Forg L (:43)
+           ======================================================================== */
+        const ORIGINAL_CEST_SCHEDULE = [
+            /* 00 - 01 */ { '03': "Sanctuary of Darkness", '23': "Crystal Nest (H)", '43': "Ancient Prison 1" },
+            /* 01 - 02 */ { '03': "Railway of Chaos", '23': "Cursed Temple 1F", '43': "Ruinen" },
+            /* 02 - 03 */ { '03': "Sanctuary of Darkness", '23': "Ruinen", '43': "Endless Tower 2F" },
+            /* 03 - 04 */ { '03': "Ancient Prison 1", '23': "Forgotten Land", '43': "Secret Laboratory" },
+            /* 04 - 05 */ { '03': "Railway of Chaos", '23': "Cursed Temple 1F", '43': "Sanctuary of Darkness" },
+            /* 05 - 06 */ { '03': "Ancient Prison 1", '23': "Forgotten Land", '43': "Railway of Chaos" },
+            /* 06 - 07 */ { '03': "Crystal Nest (H)", '23': "Ruinen", '43': "Ancient Prison 1" },
+            /* 07 - 08 */ { '03': "Endless Tower 2F", '23': "Battlefield of the Ancients", '43': "Secret Laboratory" },
+            /* 08 - 09 */ { '03': "Sanctuary of Darkness", '23': "Cursed Temple 1F", '43': "Battlefield of the Ancients" },
+            /* 09 - 10 */ { '03': "Cursed Temple 1F", '23': "Sanctuary of Darkness", '43': "Ruinen" },
+            /* 10 - 11 */ { '03': "Railway of Chaos", '23': "Forgotten Land", '43': "Crystal Nest (H)" },
+            /* 11 - 12 */ { '03': "Sanctuary of Darkness", '23': "Ruinen", '43': "Ancient Prison 1" },
+            /* 12 - 13 */ { '03': "Endless Tower 2F", '23': "Cursed Temple 1F", '43': "Battlefield of the Ancients" },
+            /* 13 - 14 */ { '03': "Forgotten Land", '23': "Sanctuary of Darkness", '43': "Secret Laboratory" },
+            /* 14 - 15 */ { '03': "Railway of Chaos", '23': "Forgotten Land", '43': "Battlefield of the Ancients" },
+            /* 15 - 16 */ { '08': "Battlefield of the Ancients (:08)", '23': "-", '43': "Sanctuary of Darkness" },
+            /* 16 - 17 */ { '03': "Ancient Prison 1", '23': "Cursed Temple 1F", '43': "Railway of Chaos" },
+            /* 17 - 18 */ { '03': "Bless Castle", '23': "-", '43': "Ruinen" },
+            /* 18 - 19 */ { '03': "Ancient Prison 1", '23': "Forgotten Land", '43': "Battlefield of the Ancients" },
+            /* 19 - 20 */ { '03': "Endless Tower 2F", '23': "Sanctuary of Darkness", '43': "Railway of Chaos" },
+            /* 20 - 21 */ { '03': "Ruinen", '23': "Secret Laboratory", '43': "Forgotten Land" },
+            /* 21 - 22 */ { '03': "Ancient Prison 1", '23': "Battlefield of the Ancients", '43': "Sanctuary of Darkness" },
+            /* 22 - 23 */ { '03': "Railway of Chaos", '23': "Sanctuary of Darkness", '43': "Cursed Temple 1F" },
+            /* 23 - 00 */ { '03': "Ruinen", '23': "Battlefield of the Ancients", '43': "Forgotten Land" }
+        ];
+
+        // State Management
+        let displayMode = 'local'; // 'local', 'irish', 'cest', 'utc'
+        let soundEnabled = false;
+        let alertPlayedForNext = false;
+        let audioContext = null;
+
+        function playAlertTone() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                const now = audioContext.currentTime;
+                [0, 0.25].forEach((delay, idx) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(idx === 0 ? 587.33 : 880, now + delay);
+
+                    gain.gain.setValueAtTime(0.3, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    osc.start(now + delay);
+                    osc.stop(now + delay + 0.35);
+                });
+            } catch (e) {
+                console.error("Audio playback error:", e);
+            }
+        }
+
+        // Setup sound buttons
+        document.getElementById('sound-toggle-btn').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            const text = document.getElementById('sound-status-text');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-bell text-amber-400";
+                text.textContent = "Audio Alert: On";
+                playAlertTone(); // Test audio on enable
+            } else {
+                icon.className = "fa-solid fa-bell-slash text-gray-500";
+                text.textContent = "Audio Alert: Off";
+            }
+        });
+
+        document.getElementById('test-sound-btn').addEventListener('click', () => {
+            playAlertTone();
+        });
+
+        function setTimezoneMode(mode) {
+            displayMode = mode;
+            
+            const btnIds = {
+                'local': 'tz-mode-local',
+                'irish': 'tz-mode-irish',
+                'cest': 'tz-mode-cest',
+                'utc': 'tz-mode-utc'
+            };
+
+            Object.keys(btnIds).forEach(m => {
+                const btn = document.getElementById(btnIds[m]);
+                if (m === mode) {
+                    btn.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-amber-500 text-ptDark-950 shadow-md";
+                } else {
+                    btn.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition";
+                }
+            });
+
+            updateUI();
+            renderScheduleTable();
+        }
+
+        /**
+         * Returns an array of absolute spawn objects in UTC Epoch milliseconds.
+         * The original schedule is based on Dutch CEST (UTC+2 in daylight saving).
+         */
+        function getUpcomingSpawnsList() {
+            const now = new Date();
+            const spawns = [];
+
+            // We generate schedule timestamps for yesterday, today, and tomorrow in CEST (UTC+2)
+            const utcTodayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0);
+
+            for (let dayOffset = -1; dayOffset <= 2; dayOffset++) {
+                ORIGINAL_CEST_SCHEDULE.forEach((hourObj, cestHour) => {
+                    Object.keys(hourObj).forEach(mStr => {
+                        const mapName = hourObj[mStr];
+                        if (!mapName || mapName === '-') return;
+
+                        const minIdx = parseInt(mStr);
+                        
+                        // CEST is UTC+2 -> Timestamp = UTC(dayOffset, cestHour - 2, minIdx)
+                        const spawnTimeUtc = utcTodayStart + (dayOffset * 86400000) + ((cestHour - 2) * 3600000) + (minIdx * 60000);
+
+                        spawns.push({
+                            timestamp: spawnTimeUtc,
+                            cestHour: cestHour,
+                            cestMin: minIdx,
+                            mapName: mapName
+                        });
+                    });
+                });
+            }
+
+            spawns.sort((a, b) => a.timestamp - b.timestamp);
+            return spawns;
+        }
+
+        // Format Date according to selected timezone
+        function formatTimeForMode(dateObj, mode) {
+            if (mode === 'local') {
+                return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            } else if (mode === 'irish') {
+                return dateObj.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', minute: '2-digit', hour12: false });
+            } else if (mode === 'cest') {
+                return dateObj.toLocaleTimeString('de-DE', { timeZone: 'Europe/Amsterdam', hour: '2-digit', minute: '2-digit', hour12: false });
+            } else if (mode === 'utc') {
+                return dateObj.toLocaleTimeString('en-US', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hour12: false }) + ' UTC';
+            }
+            return dateObj.toLocaleTimeString();
+        }
+
+        function updateUI() {
+            const nowUtcMs = Date.now();
+            const nowObj = new Date();
+
+            // Clocks Update
+            document.getElementById('local-clock').textContent = nowObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            document.getElementById('irish-clock').textContent = nowObj.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            document.getElementById('cest-clock').textContent = nowObj.toLocaleTimeString('de-DE', { timeZone: 'Europe/Amsterdam', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            document.getElementById('utc-clock').textContent = nowObj.toLocaleTimeString('en-US', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+            try {
+                const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                document.getElementById('local-tz-abbr').textContent = tzName;
+            } catch(e) {
+                document.getElementById('local-tz-abbr').textContent = "Local Time";
+            }
+
+            // Spawns Check
+            const allSpawns = getUpcomingSpawnsList();
+            const ACTIVE_DURATION_MS = 10 * 60 * 1000; // Boss remains active for 10 mins
+
+            let activeSpawn = null;
+            let nextSpawn = null;
+
+            for (let i = 0; i < allSpawns.length; i++) {
+                const s = allSpawns[i];
+                const diff = s.timestamp - nowUtcMs;
+
+                if (diff <= 0 && diff >= -ACTIVE_DURATION_MS) {
+                    activeSpawn = s;
+                } else if (diff > 0) {
+                    if (!nextSpawn) {
+                        nextSpawn = s;
+                    }
+                }
+            }
+
+            const heroCard = document.getElementById('hero-status-card');
+            const badge = document.getElementById('spawn-status-badge');
+            const targetMapEl = document.getElementById('next-map-name');
+            const countdownEl = document.getElementById('countdown-timer');
+            const spawnTimeLocalEl = document.getElementById('next-spawn-time-local');
+            const spawnTimeLabel = document.getElementById('next-spawn-time-label');
+
+            const currentTarget = activeSpawn || nextSpawn;
+
+            if (currentTarget) {
+                const timeObj = new Date(currentTarget.timestamp);
+                const formattedTime = formatTimeForMode(timeObj, displayMode);
+
+                targetMapEl.textContent = currentTarget.mapName;
+                spawnTimeLabel.textContent = `Scheduled: ${formattedTime}`;
+
+                if (activeSpawn) {
+                    heroCard.classList.add('glass-card-active', 'active-spawn-pulse');
+                    badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/40 flex items-center gap-1.5 animate-pulse";
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> ACTIVE NOW!`;
+
+                    const elapsedMs = nowUtcMs - activeSpawn.timestamp;
+                    const remActiveMs = ACTIVE_DURATION_MS - elapsedMs;
+                    const activeMins = Math.floor(remActiveMs / 60000);
+                    const activeSecs = Math.floor((remActiveMs % 60000) / 1000);
+
+                    countdownEl.textContent = `Active (${activeMins}m ${activeSecs}s left)`;
+                    countdownEl.className = "font-mono text-xl sm:text-2xl font-extrabold text-red-400 glow-red";
+                    spawnTimeLocalEl.textContent = `Spawned at ${formattedTime}! Target active in game.`;
+                } else {
+                    heroCard.classList.remove('glass-card-active', 'active-spawn-pulse');
+                    badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> NEXT SPAWN`;
+
+                    const diffMs = currentTarget.timestamp - nowUtcMs;
+                    const mins = Math.floor(diffMs / 60000);
+                    const secs = Math.floor((diffMs % 60000) / 1000);
+
+                    countdownEl.textContent = `${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+                    countdownEl.className = "font-mono text-3xl sm:text-4xl font-extrabold text-cyan-400 glow-cyan";
+
+                    spawnTimeLocalEl.textContent = `Target Spawn Time (${displayMode.toUpperCase()}): ${formattedTime}`;
+
+                    if (soundEnabled && mins === 2 && secs === 0 && !alertPlayedForNext) {
+                        playAlertTone();
+                        alertPlayedForNext = true;
+                    }
+                    if (mins > 2) {
+                        alertPlayedForNext = false;
+                    }
+                }
+            }
+
+            // Populate Upcoming Spawns List
+            const upcomingListEl = document.getElementById('upcoming-list');
+            const futureSpawns = allSpawns.filter(s => s.timestamp > nowUtcMs).slice(0, 3);
+            
+            upcomingListEl.innerHTML = '';
+            futureSpawns.forEach((s, idx) => {
+                const sDate = new Date(s.timestamp);
+                const timeDisplay = formatTimeForMode(sDate, displayMode);
+                const diffMs = s.timestamp - nowUtcMs;
+                const inMins = Math.floor(diffMs / 60000);
+
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-between p-2.5 rounded-xl bg-ptDark-900/60 border border-gray-800 text-xs";
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5 overflow-hidden">
+                        <span class="w-5 h-5 rounded-lg bg-amber-500/10 text-amber-400 font-bold flex items-center justify-center text-[10px] shrink-0 border border-amber-500/20">
+                            ${idx + 1}
+                        </span>
+                        <span class="font-medium text-gray-200 truncate">${s.mapName}</span>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <div class="font-mono text-amber-300 font-semibold">${timeDisplay}</div>
+                        <div class="text-[10px] text-gray-500">in ${inMins} mins</div>
+                    </div>
+                `;
+                upcomingListEl.appendChild(item);
+            });
+        }
+
+        function renderScheduleTable() {
+            const tbody = document.getElementById('schedule-tbody');
+            tbody.innerHTML = '';
+
+            const searchQuery = document.getElementById('map-search-input').value.toLowerCase().trim();
+            const now = new Date();
+            const nowUtcMs = Date.now();
+
+            // Calculate current hour offset relative to CEST
+            let currentHourInSelectedTz = 0;
+            if (displayMode === 'cest') {
+                const cestStr = now.toLocaleTimeString('de-DE', { timeZone: 'Europe/Amsterdam', hour: '2-digit', hour12: false });
+                currentHourInSelectedTz = parseInt(cestStr);
+            } else if (displayMode === 'irish') {
+                const ieStr = now.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', hour12: false });
+                currentHourInSelectedTz = parseInt(ieStr);
+            } else if (displayMode === 'utc') {
+                currentHourInSelectedTz = now.getUTCHours();
+            } else { // local
+                currentHourInSelectedTz = now.getHours();
+            }
+
+            ORIGINAL_CEST_SCHEDULE.forEach((rowObj, cestHour) => {
+                // Calculate representative date for this row to format the hour interval in target timezone
+                const todayCestStart = new Date();
+                // Set to CEST hour today
+                const cestDateString = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Amsterdam' });
+                const baseDate = new Date(`${cestDateString} ${String(cestHour).padStart(2,'0')}:00:00 GMT+0200`);
+
+                let displayHourStart = 0;
+                let hourLabel = "";
+
+                if (displayMode === 'cest') {
+                    displayHourStart = cestHour;
+                    const startH = String(cestHour).padStart(2, '0');
+                    const endH = String((cestHour + 1) % 24).padStart(2, '0');
+                    hourLabel = `${startH}:00 - ${endH}:00`;
+                } else if (displayMode === 'irish') {
+                    const startStr = baseDate.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', hour12: false });
+                    displayHourStart = parseInt(startStr);
+                    const endDate = new Date(baseDate.getTime() + 3600000);
+                    const endStr = endDate.toLocaleTimeString('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', hour12: false });
+                    hourLabel = `${startStr}:00 - ${endStr}:00`;
+                } else if (displayMode === 'utc') {
+                    const startStr = baseDate.toLocaleTimeString('en-US', { timeZone: 'UTC', hour: '2-digit', hour12: false });
+                    displayHourStart = parseInt(startStr);
+                    const endDate = new Date(baseDate.getTime() + 3600000);
+                    const endStr = endDate.toLocaleTimeString('en-US', { timeZone: 'UTC', hour: '2-digit', hour12: false });
+                    hourLabel = `${startStr}:00 - ${endStr}:00 UTC`;
+                } else { // local
+                    const localStartH = baseDate.getHours();
+                    displayHourStart = localStartH;
+                    const localEndH = (localStartH + 1) % 24;
+                    hourLabel = `${String(localStartH).padStart(2,'0')}:00 - ${String(localEndH).padStart(2,'0')}:00`;
+                }
+
+                const isCurrentHourRow = (displayHourStart === currentHourInSelectedTz);
+
+                const slot1Map = rowObj['03'] || rowObj['08'] || '-';
+                const slot2Map = rowObj['23'] || '-';
+                const slot3Map = rowObj['43'] || '-';
+
+                const matchesSearch = searchQuery === '' || 
+                    slot1Map.toLowerCase().includes(searchQuery) || 
+                    slot2Map.toLowerCase().includes(searchQuery) || 
+                    slot3Map.toLowerCase().includes(searchQuery);
+
+                if (!matchesSearch) {
+                    return;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/40 transition border-b border-gray-800/40";
+
+                if (isCurrentHourRow) {
+                    tr.classList.add('bg-amber-500/10', 'border-l-4', 'border-l-amber-400');
+                }
+
+                function formatCell(mapText, minuteSlot) {
+                    if (mapText === '-') return `<span class="text-gray-600">-</span>`;
+                    
+                    const isMatch = searchQuery !== '' && mapText.toLowerCase().includes(searchQuery);
+                    const highlightClass = isMatch ? 'bg-amber-400/20 text-amber-200 font-bold px-2 py-0.5 rounded border border-amber-400/30' : '';
+
+                    // Check if this specific cell is currently active in game
+                    const minVal = parseInt(minuteSlot);
+                    const utcTodayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0);
+                    
+                    // Spawn time for today
+                    let spawnUtc = utcTodayStart + ((cestHour - 2) * 3600000) + (minVal * 60000);
+                    let diffMs = nowUtcMs - spawnUtc;
+                    
+                    // Adjust for day boundaries
+                    if (diffMs > 43200000) {
+                        spawnUtc += 86400000;
+                        diffMs = nowUtcMs - spawnUtc;
+                    } else if (diffMs < -43200000) {
+                        spawnUtc -= 86400000;
+                        diffMs = nowUtcMs - spawnUtc;
+                    }
+
+                    const isActiveNow = (diffMs >= 0 && diffMs <= 10 * 60 * 1000);
+
+                    if (isActiveNow) {
+                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500/20 text-red-300 font-bold border border-red-500/40 animate-pulse">
+                            <i class="fa-solid fa-bullseye text-[10px]"></i> ${mapText}
+                        </span>`;
+                    }
+
+                    return `<span class="${highlightClass}">${mapText}</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="py-3.5 px-6 font-mono font-bold text-gray-300 flex items-center gap-2">
+                        ${isCurrentHourRow ? '<i class="fa-solid fa-clock text-amber-400 text-xs"></i>' : ''}
+                        ${hourLabel}
+                    </td>
+                    <td class="py-3.5 px-6">${formatCell(slot1Map, rowObj['03'] ? '03' : '08')}</td>
+                    <td class="py-3.5 px-6">${formatCell(slot2Map, '23')}</td>
+                    <td class="py-3.5 px-6">${formatCell(slot3Map, '43')}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Search Handlers
+        const searchInput = document.getElementById('map-search-input');
+        const clearBtn = document.getElementById('clear-search-btn');
+
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.trim().length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            renderScheduleTable();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearBtn.classList.add('hidden');
+            renderScheduleTable();
+        });
+
+        window.onload = function() {
+            updateUI();
+            renderScheduleTable();
+            // 1-second refresh loop
+            setInterval(updateUI, 1000);
+            // 30-second table re-render for row highlighting updates
+            setInterval(renderScheduleTable, 30000);
+        };
+    </script>
+</body>
+</html>
