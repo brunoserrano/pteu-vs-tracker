@@ -4,6 +4,8 @@ let soundEnabled = false;
 let alertPlayedForNext = false;
 let audioContext = null;
 
+const ACTIVE_DURATION_MS = 5 * 60 * 1000; // Active for 5 mins
+
 // Fetch Schedule JSON asynchronously
 async function loadSchedule() {
     try {
@@ -120,7 +122,6 @@ function updateUI() {
     }
 
     const allSpawns = getUpcomingSpawnsList();
-    const ACTIVE_DURATION_MS = 10 * 60 * 1000; // Active for 10 mins
 
     let activeSpawn = null;
     let nextSpawn = null;
@@ -315,7 +316,7 @@ function renderScheduleTable() {
                 diffMs = nowUtcMs - spawnUtc;
             }
 
-            const isActiveNow = (diffMs >= 0 && diffMs <= 10 * 60 * 1000);
+            const isActiveNow = (diffMs >= 0 && diffMs <= ACTIVE_DURATION_MS);
 
             if (isActiveNow) {
                 return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500/20 text-red-300 font-bold border border-red-500/40 animate-pulse">
